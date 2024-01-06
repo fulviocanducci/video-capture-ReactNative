@@ -1,16 +1,22 @@
 import { useRef, useState, useEffect } from "react";
 import { StyleSheet, Text, View } from "react-native";
 
-import { Camera, CameraType } from "expo-camera";
+import { Camera, CameraRecordingOptions, CameraType } from "expo-camera";
 import { Video } from "expo-av";
 import { shareAsync } from "expo-sharing";
 import * as MediaLibrary from "expo-media-library";
 
 import { IPermissionExponseResponse } from "./src/interfaces";
 import { PERMISSION_EXPONSE_DEFAULT } from "./src/constantes";
+import { CameraView } from "./src/components/CameraView";
+import { VideoPlayer } from "./src/components/VideoPlayer";
 
 export default function App() {
+  const cameraRef = useRef<Camera>(null);
+  const [isRecording, setIsRecording] = useState<boolean>(false);
   const [permissions, setPermissions] = useState<IPermissionExponseResponse>(PERMISSION_EXPONSE_DEFAULT);
+  const [video, setVideo] = useState<any>();
+
   const requestPermissions = async () => {
     const cameraPermissionRequest = await Camera.requestCameraPermissionsAsync();
     const microfonePermissionRequest = await Camera.requestMicrophonePermissionsAsync();
@@ -34,11 +40,33 @@ export default function App() {
     return <Text>Não tem acesso a bibliotecas</Text>;
   }
 
-  return (
-    <View style={styles.container}>
-      <Text>Open up App.tsx to start working on your app!</Text>
-    </View>
-  );
+  const stopRecording = () => {
+    if (cameraRef && cameraRef.current) {
+      cameraRef.current.stopRecording();
+      setIsRecording(false);
+    }
+  };
+
+  const recordVideo = () => {
+    setIsRecording(true);
+    const options: CameraRecordingOptions = {
+      quality: "1080p",
+      maxDuration: 60,
+      mute: false,
+    };
+    if (cameraRef && cameraRef.current) {
+      cameraRef.current.recordAsync(options).then((recordedVideo) => {
+        setVideo(recordedVideo);
+        setIsRecording(false);
+      });
+    }
+  };
+
+  if (video) {
+    return <VideoPlayer />;
+  }
+
+  return <CameraView cameraRef={cameraRef} isRecording={isRecording} onRecord={recordVideo} onStopRecording={stopRecording}></CameraView>;
 }
 
 const styles = StyleSheet.create({
