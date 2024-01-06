@@ -12,3 +12,10 @@ export interface ICameraView {
   onRecord: () => void;
   onStopRecording: () => void;
 }
+
+export interface IVideoPlayer {
+  video: any;
+  onShare: () => void;
+  onSave: () => void;
+  onDiscard: () => void;
+}

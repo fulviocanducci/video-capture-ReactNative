@@ -61,9 +61,21 @@ export default function App() {
       });
     }
   };
-
+  const shareVideo = () => {
+    shareAsync(video.uri).then(() => {
+      discardVideo();
+    });
+  };
+  const saveVideo = () => {
+    MediaLibrary.saveToLibraryAsync(video.uri).then(() => {
+      discardVideo();
+    });
+  };
+  const discardVideo = () => {
+    setVideo(undefined);
+  };
   if (video) {
-    return <VideoPlayer />;
+    return <VideoPlayer video={video} onShare={shareVideo} onSave={saveVideo} onDiscard={discardVideo} />;
   }
 
   return <CameraView cameraRef={cameraRef} isRecording={isRecording} onRecord={recordVideo} onStopRecording={stopRecording}></CameraView>;
